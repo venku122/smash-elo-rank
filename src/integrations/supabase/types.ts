@@ -14,7 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          present: boolean
+          session_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          present?: boolean
+          session_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          present?: boolean
+          session_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elo_history: {
+        Row: {
+          created_at: string
+          elo_after: number
+          elo_before: number
+          elo_change: number
+          id: string
+          match_id: string
+          player_id: string
+        }
+        Insert: {
+          created_at?: string
+          elo_after: number
+          elo_before: number
+          elo_change: number
+          id?: string
+          match_id: string
+          player_id: string
+        }
+        Update: {
+          created_at?: string
+          elo_after?: number
+          elo_before?: number
+          elo_change?: number
+          id?: string
+          match_id?: string
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elo_history_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "elo_history_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          court_number: number
+          created_at: string
+          id: string
+          is_completed: boolean
+          match_type: string
+          player1_id: string
+          player2_id: string
+          player3_id: string | null
+          player4_id: string | null
+          session_date: string
+          winner_ids: string[]
+        }
+        Insert: {
+          court_number: number
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          match_type: string
+          player1_id: string
+          player2_id: string
+          player3_id?: string | null
+          player4_id?: string | null
+          session_date: string
+          winner_ids: string[]
+        }
+        Update: {
+          court_number?: number
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          match_type?: string
+          player1_id?: string
+          player2_id?: string
+          player3_id?: string | null
+          player4_id?: string | null
+          session_date?: string
+          winner_ids?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_player1_id_fkey"
+            columns: ["player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player2_id_fkey"
+            columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player3_id_fkey"
+            columns: ["player3_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player4_id_fkey"
+            columns: ["player4_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          created_at: string
+          current_elo: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_elo?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_elo?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
