@@ -279,6 +279,10 @@ export const MatchResults = () => {
           </PopoverContent>
         </Popover>
       </div>
+      
+      <p className="text-sm text-muted-foreground">
+        Select the session date, then click the "Wins" button for each match to record results and update ELO.
+      </p>
 
       <div className="space-y-4">
         {matches.length === 0 ? (

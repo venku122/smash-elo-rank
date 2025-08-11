@@ -29,7 +29,7 @@ const Index = () => {
             <TabsTrigger value="players">Players</TabsTrigger>
             <TabsTrigger value="attendance">Attendance</TabsTrigger>
             <TabsTrigger value="matches">Generate</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
+            <TabsTrigger value="results">Enter Results</TabsTrigger>
             <TabsTrigger value="stats">Stats</TabsTrigger>
           </TabsList>
 
