@@ -101,134 +101,30 @@ export const MatchResults = () => {
 
   const updateMatchResult = async (matchId: string, winnerIds: string[]) => {
     const match = matches.find(m => m.id === matchId);
-    if (!match || !match.players) return;
+    if (!match) return;
 
     setIsSaving(true);
-    
+
     try {
-      // Update match with winner
-      const { error: matchError } = await supabase
-        .from('matches')
-        .update({
-          winner_ids: winnerIds,
-          is_completed: true
-        })
-        .eq('id', matchId);
+      // Use secure RPC that performs atomic ELO updates server-side
+      const { error } = await supabase.rpc('record_match_result', {
+        _match_id: matchId,
+        _winner_ids: winnerIds,
+        _k_factor: 32,
+      });
 
-      if (matchError) throw matchError;
-
-      // Calculate ELO changes
-      const allPlayerIds = [
-        match.player1_id,
-        match.player2_id,
-        match.player3_id,
-        match.player4_id
-      ].filter(Boolean);
-
-      const eloUpdates = [];
-      const eloHistory = [];
-
-      if (match.match_type === 'singles') {
-        const player1 = match.players[match.player1_id];
-        const player2 = match.players[match.player2_id];
-        const winner = winnerIds.includes(player1.id) ? player1 : player2;
-        const loser = winnerIds.includes(player1.id) ? player2 : player1;
-
-        const eloChange = calculateEloChange(winner.current_elo, loser.current_elo);
-
-        eloUpdates.push(
-          { id: winner.id, current_elo: winner.current_elo + eloChange },
-          { id: loser.id, current_elo: loser.current_elo - eloChange }
-        );
-
-        eloHistory.push(
-          {
-            player_id: winner.id,
-            match_id: matchId,
-            elo_before: winner.current_elo,
-            elo_after: winner.current_elo + eloChange,
-            elo_change: eloChange
-          },
-          {
-            player_id: loser.id,
-            match_id: matchId,
-            elo_before: loser.current_elo,
-            elo_after: loser.current_elo - eloChange,
-            elo_change: -eloChange
-          }
-        );
-      } else {
-        // Doubles logic
-        const team1 = [match.players[match.player1_id], match.players[match.player4_id!]];
-        const team2 = [match.players[match.player2_id], match.players[match.player3_id!]];
-        
-        const team1Elo = (team1[0].current_elo + team1[1].current_elo) / 2;
-        const team2Elo = (team2[0].current_elo + team2[1].current_elo) / 2;
-        
-        const team1Wins = winnerIds.includes(team1[0].id);
-        const winningTeam = team1Wins ? team1 : team2;
-        const losingTeam = team1Wins ? team2 : team1;
-        const winningElo = team1Wins ? team1Elo : team2Elo;
-        const losingElo = team1Wins ? team2Elo : team1Elo;
-
-        const eloChange = calculateEloChange(winningElo, losingElo);
-
-        winningTeam.forEach(player => {
-          eloUpdates.push({
-            id: player.id,
-            current_elo: player.current_elo + eloChange
-          });
-          eloHistory.push({
-            player_id: player.id,
-            match_id: matchId,
-            elo_before: player.current_elo,
-            elo_after: player.current_elo + eloChange,
-            elo_change: eloChange
-          });
-        });
-
-        losingTeam.forEach(player => {
-          eloUpdates.push({
-            id: player.id,
-            current_elo: player.current_elo - eloChange
-          });
-          eloHistory.push({
-            player_id: player.id,
-            match_id: matchId,
-            elo_before: player.current_elo,
-            elo_after: player.current_elo - eloChange,
-            elo_change: -eloChange
-          });
-        });
-      }
-
-      // Update player ELOs
-      for (const update of eloUpdates) {
-        const { error } = await supabase
-          .from('players')
-          .update({ current_elo: update.current_elo })
-          .eq('id', update.id);
-        
-        if (error) throw error;
-      }
-
-      // Insert ELO history
-      const { error: historyError } = await supabase
-        .from('elo_history')
-        .insert(eloHistory);
-
-      if (historyError) throw historyError;
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: "Match result saved and ELO updated",
       });
 
-      fetchMatches();
-    } catch (error) {
+      await fetchMatches();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save match result",
+        description: error?.message || "Failed to save match result",
         variant: "destructive",
       });
     } finally {

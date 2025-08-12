@@ -199,6 +199,14 @@ export const MatchGenerator = () => {
     }
   };
 
+  const escapeHtml = (str: string) =>
+    String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
   const printMatches = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -228,15 +236,15 @@ export const MatchGenerator = () => {
               <div class="court">Court ${match.court_number}</div>
               ${match.match_type === 'singles' ? `
                 <div class="players">
-                  <div>${match.player1.name} (${match.player1.current_elo})</div>
+                  <div>${escapeHtml(match.player1.name)} (${match.player1.current_elo})</div>
                   <div class="vs">VS</div>
-                  <div>${match.player2.name} (${match.player2.current_elo})</div>
+                  <div>${escapeHtml(match.player2.name)} (${match.player2.current_elo})</div>
                 </div>
               ` : `
                 <div class="players">
-                  <div class="team">Team 1: ${match.player1.name} (${match.player1.current_elo}) & ${match.player4!.name} (${match.player4!.current_elo})</div>
+                  <div class="team">Team 1: ${escapeHtml(match.player1.name)} (${match.player1.current_elo}) & ${escapeHtml(match.player4!.name)} (${match.player4!.current_elo})</div>
                   <div class="vs">VS</div>
-                  <div class="team">Team 2: ${match.player2.name} (${match.player2.current_elo}) & ${match.player3!.name} (${match.player3!.current_elo})</div>
+                  <div class="team">Team 2: ${escapeHtml(match.player2.name)} (${match.player2.current_elo}) & ${escapeHtml(match.player3!.name)} (${match.player3!.current_elo})</div>
                 </div>
               `}
               <div style="margin-top: 15px; font-size: 12px;">
